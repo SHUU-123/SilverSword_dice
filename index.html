@@ -3,254 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>銀剣のステラナイツ Dice Roller</title>
+    <title>StellaKnights Dice Roller</title>
     <style>
         :root {
-            --primary-bg: #1a1a2e;
-            --secondary-bg: #16213e;
-            --accent-silver: #e0e0e0;
-            --accent-blue: #4ecca3;
-            --dice-bg: #ffffff;
-            --dice-color: #333333;
-            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --primary-color: #4a90e2;
+            --bg-color: #1a1c2c;
+            --card-bg: #2a2d3e;
+            --text-color: #e0e0e0;
+            --accent-color: #f39c12;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--primary-bg);
-            color: var(--accent-silver);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            touch-action: manipulation; /* ダブルタップズーム防止 */
-        }
-
-        h1 {
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--accent-blue);
-            padding-bottom: 10px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
         }
 
         .container {
             width: 100%;
             max-width: 600px;
-            background-color: var(--secondary-bg);
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            text-align: center;
+            box-sizing: border-box;
         }
 
-        /* コントロールエリア */
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+            margin-bottom: 20px;
+        }
+
+        /* ダイスボタンエリア */
+        .dice-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        .btn-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-silver);
-            background: transparent;
-            color: var(--accent-silver);
-            font-size: 24px;
+        button {
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            color: white;
+            padding: 20px 10px;
+            font-size: 1.2rem;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.1s, background 0.2s;
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            background: var(--primary-color);
+        }
+
+        /* カスタムエリア */
+        .custom-area {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .btn-circle:active {
-            background-color: var(--accent-silver);
-            color: var(--primary-bg);
-        }
-
-        #diceCount {
-            font-size: 32px;
-            font-weight: bold;
-            width: 60px;
-            text-align: center;
-            background: transparent;
-            border: none;
-            color: var(--accent-blue);
-        }
-
-        .roll-btn {
-            display: block;
-            width: 100%;
+        input[type="number"] {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid #555;
+            color: white;
             padding: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: var(--primary-bg);
-            background: linear-gradient(135deg, #e0e0e0 0%, #b0b0b0 100%);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(224, 224, 224, 0.3);
-            transition: transform 0.1s;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
         }
 
-        .roll-btn:active {
-            transform: scale(0.98);
+        .btn-roll {
+            background: var(--primary-color);
+            flex: 2;
         }
 
-        /* 結果表示エリア */
-        .results-area {
-            margin-top: 30px;
-            min-height: 150px;
+        /* ログエリア */
+        .log-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            height: 400px;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
+            flex-direction: column;
         }
 
-        .die {
-            width: 60px;
-            height: 60px;
-            background-color: var(--dice-bg);
-            border-radius: 10px;
+        .log-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            font-size: 36px;
-            color: var(--dice-color);
-            position: relative;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
         }
 
-        /* 6の目は強調（クリティカル等のため） */
-        .die[data-value="6"] {
-            color: #d32f2f;
-            border: 2px solid #d32f2f;
-        }
-        
-        /* 1の目はファンブル警戒用に色変え */
-        .die[data-value="1"] {
-            color: #1976d2;
+        #log-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .summary {
-            margin-top: 20px;
-            font-size: 14px;
+        .log-item {
+            padding: 10px;
+            border-bottom: 1px solid #3d4155;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .log-time {
+            font-size: 0.8rem;
             color: #888;
         }
 
-        @keyframes popIn {
-            from { transform: scale(0) rotate(-180deg); opacity: 0; }
-            to { transform: scale(1) rotate(0deg); opacity: 1; }
+        .log-result {
+            font-size: 1.1rem;
+            margin-top: 5px;
         }
 
-        /* 星空背景エフェクト（簡易） */
-        .stars {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
-                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
-            background-size: 550px 550px, 350px 350px, 250px 250px;
-            background-position: 0 0, 40px 60px, 130px 270px;
+        .dice-val {
+            display: inline-block;
+            background: #444;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            border: 1px solid var(--primary-color);
         }
 
+        .btn-clear {
+            background: #e74c3c;
+            border: none;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="stars"></div>
+<div class="container">
+    <h1>銀剣のステラナイツ Dice</h1>
 
-    <h1>STELLA KNIGHTS<br><span style="font-size:0.6em; color:#888;">Dice Roller</span></h1>
-
-    <div class="container">
-        <div class="controls">
-            <button class="btn-circle" onclick="adjustCount(-1)">-</button>
-            <div id="diceCount">6</div>
-            <button class="btn-circle" onclick="adjustCount(1)">+</button>
-        </div>
-
-        <button class="roll-btn" onclick="rollDice()">ROLL THE DICE</button>
-
-        <div class="summary" id="summaryText">セット確認用にソートして表示されます</div>
-
-        <div class="results-area" id="resultsArea">
-            </div>
+    <div class="dice-grid">
+        <button onclick="roll(1)">1d6</button>
+        <button onclick="roll(2)">2d6</button>
+        <button onclick="roll(3)">3d6</button>
+        <button onclick="roll(4)">4d6</button>
+        <button onclick="roll(5)">5d6</button>
+        <button onclick="roll(6)">6d6</button>
     </div>
 
-    <script>
-        let currentCount = 6;
-        const diceChars = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅']; // Unicodeダイス
+    <div class="custom-area">
+        <input type="number" id="custom-count" value="7" min="1" max="99">
+        <button class="btn-roll" onclick="rollCustom()">カスタム</button>
+    </div>
 
-        function adjustCount(amount) {
-            currentCount += amount;
-            if (currentCount < 1) currentCount = 1;
-            if (currentCount > 20) currentCount = 20; // 制限
-            document.getElementById('diceCount').textContent = currentCount;
+    <div class="log-container">
+        <div class="log-header">
+            <span>判定ログ</span>
+            <button class="btn-clear" onclick="clearLog()">削除</button>
+        </div>
+        <ul id="log-list"></ul>
+    </div>
+</div>
+
+<script>
+    const logList = document.getElementById('log-list');
+    const STORAGE_KEY = 'stella_knights_logs';
+
+    // 初期化：保存されたログを読み込む
+    window.onload = () => {
+        const savedLogs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        savedLogs.forEach(log => appendLogToUI(log.time, log.count, log.results));
+    };
+
+    function roll(count) {
+        const results = [];
+        for (let i = 0; i < count; i++) {
+            results.push(Math.floor(Math.random() * 6) + 1);
         }
+        addLog(count, results);
+    }
 
-        function rollDice() {
-            const resultsArea = document.getElementById('resultsArea');
-            resultsArea.innerHTML = ''; // クリア
-            
-            const results = [];
-            
-            // ダイスロール
-            for (let i = 0; i < currentCount; i++) {
-                results.push(Math.floor(Math.random() * 6) + 1);
-            }
+    function rollCustom() {
+        const count = parseInt(document.getElementById('custom-count').value);
+        if (isNaN(count) || count < 1) return;
+        roll(count);
+    }
 
-            // ステラナイツ用ロジック：降順ソート（セットを見つけやすくする）
-            results.sort((a, b) => b - a);
+    function addLog(count, results) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        // UIに追加
+        appendLogToUI(time, count, results);
 
-            // 表示処理
-            results.forEach((val, index) => {
-                const die = document.createElement('div');
-                die.className = 'die';
-                die.dataset.value = val;
-                die.textContent = diceChars[val - 1]; // 数字ではなくサイコロ記号を表示
-                
-                // アニメーションを少しずらす
-                die.style.animationDelay = `${index * 0.05}s`;
-                
-                resultsArea.appendChild(die);
-            });
+        // ローカルストレージに保存
+        const savedLogs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        savedLogs.unshift({ time, count, results });
+        if (savedLogs.length > 50) savedLogs.pop(); // 最大50件保持
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedLogs));
+    }
 
-            // 簡易サマリー（最大値など）
-            const maxVal = Math.max(...results);
-            const sets = findSets(results);
-            let summary = `最大値: ${maxVal}`;
-            if(sets.length > 0) {
-                summary += ` | セットあり: ${sets.join(', ')}`;
-            }
-            document.getElementById('summaryText').textContent = summary;
+    function appendLogToUI(time, count, results) {
+        const li = document.createElement('li');
+        li.className = 'log-item';
+        
+        const diceHtml = results.map(n => `<span class="dice-val">${n}</span>`).join('');
+        
+        li.innerHTML = `
+            <div class="log-time">${time} - ${count}d6</div>
+            <div class="log-result">${diceHtml}</div>
+        `;
+        
+        logList.insertBefore(li, logList.firstChild);
+    }
+
+    function clearLog() {
+        if (confirm('ログをすべて削除しますか？')) {
+            localStorage.removeItem(STORAGE_KEY);
+            logList.innerHTML = '';
         }
+    }
+</script>
 
-        // セット（同じ出目の重なり）を見つける補助関数
-        function findSets(arr) {
-            const counts = {};
-            arr.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
-            
-            const sets = [];
-            for (const num in counts) {
-                if (counts[num] >= 2) {
-                    sets.push(`${num}が${counts[num]}個`);
-                }
-            }
-            return sets;
-        }
-    </script>
 </body>
 </html>
